@@ -1,31 +1,24 @@
 pub mod game_manager;
 pub mod log_manager;
 
-use std::mem::replace;
-
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
-pub enum ManagerKind {
-    LOG,
-    DISPLAY,
-    GAME,
-    INPUT,
-    RESOURCE,
-    WORLD,
-}
-
 pub struct Managers {
-    pub log: Option<log_manager::LogManager>,
-    pub game: Option<game_manager::GameManager>,
+    log: log_manager::LogManager,
+    game: game_manager::GameManager,
 }
 
 impl Managers {
-    pub fn take_log(&mut self) -> log_manager::LogManager {
-        let m = replace(&mut self.log, None);
-        m.unwrap()
+    pub fn new() -> Managers {
+        Managers {
+            log: log_manager::LogManager::new(),
+            game: game_manager::GameManager::new(),
+        }
     }
 
-    pub fn take_game(&mut self) -> game_manager::GameManager {
-        let m = replace(&mut self.game, None);
-        m.unwrap()
+    pub fn get_log_manager(&self) -> &log_manager::LogManager {
+        &self.log
+    }
+
+    pub fn get_game_manager(&self) -> &game_manager::GameManager {
+        &self.game
     }
 }

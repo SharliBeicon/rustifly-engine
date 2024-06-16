@@ -4,19 +4,22 @@ use std::{thread::sleep, time::Duration};
 const REFRESH_RATE: u64 = 33333333;
 
 pub struct GameManager {
+    pub game_over: bool,
     clock: utility::Clock,
 }
 
 impl GameManager {
     pub fn new() -> GameManager {
         GameManager {
+            game_over: false,
             clock: utility::Clock::new(),
         }
     }
 
     pub fn run(&mut self) {
         let mut adjust_time: i32 = 0;
-        loop {
+        let mut cont = 0;
+        while !self.game_over {
             self.clock.delta();
 
             println!("GAME LOOP GOES HERE");
@@ -34,6 +37,12 @@ impl GameManager {
 
             if adjust_time < 0 {
                 adjust_time = 0;
+            }
+
+            cont += 1;
+            if cont > 200 {
+                println!("GAME OVER BITCH");
+                self.game_over = true;
             }
         }
     }
