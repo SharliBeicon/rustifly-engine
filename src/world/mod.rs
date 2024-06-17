@@ -1,1 +1,2 @@
-mod geometry;
+pub mod geometry;
+pub mod assets;
