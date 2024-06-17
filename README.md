@@ -1,2 +1,2 @@
 # rustifly-engine
-Game Engine for ASCII Games Develpoment
+Game Engine for ASCII Games Development
