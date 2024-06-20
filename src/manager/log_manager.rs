@@ -10,6 +10,16 @@ pub struct LogManager {
 }
 
 impl LogManager {
+    pub fn new() -> Self {
+        let file = OpenOptions::new()
+            .append(true)
+            .create(true)
+            .open(FILENAME)
+            .expect("Unable to open or create file");
+
+        LogManager { file }
+    }
+
     pub fn write_log(&self, kind: LogKind, message: String) {
         write!(
             &self.file,
@@ -21,18 +31,6 @@ impl LogManager {
         .expect("Error handling the log file");
 
         writeln!(&self.file).expect("Error handling the log file");
-    }
-}
-
-impl LogManager {
-    pub fn new() -> Self {
-        let file = OpenOptions::new()
-            .append(true)
-            .create(true)
-            .open(FILENAME)
-            .expect("Unable to open or create file");
-
-        LogManager { file }
     }
 }
 
