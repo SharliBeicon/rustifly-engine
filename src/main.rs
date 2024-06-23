@@ -1,13 +1,8 @@
-use rustifly_engine::{world::*, GAME_MANAGER};
+use rustifly_engine::{manager::GameManager, world::*};
 
-fn main() {
-    let mut game_manager = GAME_MANAGER.lock().unwrap();
-
-    for _ in 0..10 {
-        game_manager.world.insert_object(Box::new(Monster::new()));
-    }
-
-    game_manager.run();
+#[tokio::main]
+async fn main() {
+    let game_manager = GameManager::new();
 }
 
 #[derive(Clone)]
@@ -19,7 +14,7 @@ struct Monster {
 }
 
 impl Monster {
-    fn handle_step_event(&self, event: &mut dyn Event) {
+    fn handle_step_event(&self, event: &mut dyn events::Event) {
         match event.as_any().downcast_mut::<EventStep>() {
             Some(e) => {
                 e.step_count = e.step_count + 1;
@@ -28,7 +23,7 @@ impl Monster {
                     self.id, e.step_count
                 );
             }
-            None => println!("Not an step event"),
+            None => println!("Not a step event"),
         }
     }
 }
@@ -57,7 +52,7 @@ impl Object for Monster {
 
     fn update(self: &mut Self) {}
 
-    fn event_handler(self: &Self, event: &mut dyn Event) {
+    fn event_handler(self: &Self, event: &mut dyn events::Event) {
         match &**event.get_kind() {
             "rf::step" => self.handle_step_event(event),
             _ => println!(

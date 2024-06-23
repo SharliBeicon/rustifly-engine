@@ -1,11 +1,13 @@
+mod display_manager;
 mod log_manager;
 mod world_manager;
-use once_cell::sync::Lazy;
 
-use crate::{utility, world::EventStep};
-use std::{sync::Mutex, thread::sleep, time::Duration};
-
-pub static GAME_MANAGER: Lazy<Mutex<GameManager>> = Lazy::new(|| Mutex::new(GameManager::new()));
+use crate::{
+    utility,
+    world::{events, EventStep},
+};
+use display_manager::*;
+use std::{thread::sleep, time::Duration};
 
 const REFRESH_RATE: u64 = 33333333;
 pub struct GameManager {
@@ -14,16 +16,32 @@ pub struct GameManager {
 
     pub log: log_manager::LogManager,
     pub world: world_manager::WorldManager,
+    pub display: display_manager::DisplayManager,
 }
 
 impl GameManager {
-    fn new() -> GameManager {
+    pub fn new() -> GameManager {
         GameManager {
             game_over: false,
             clock: utility::Clock::new(),
             log: log_manager::LogManager::new(),
             world: world_manager::WorldManager::new(),
+            display: DisplayManagerBuilder::new()
+                .with_title("Rustifly engine".to_string())
+                .with_size(1024, 768)
+                .build(),
         }
+    }
+
+    pub fn on_event(self: &mut Self, event: &mut dyn events::Event) -> i32 {
+        let mut count = 0;
+
+        self.world.objects_mut().iter().for_each(|object| {
+            object.event_handler(event);
+            count += 1;
+        });
+
+        count
     }
 
     pub fn run(&mut self) {
@@ -32,11 +50,9 @@ impl GameManager {
 
         while !self.game_over {
             self.clock.delta();
-            /* ********* */
+            /* **** MAIN GAME LOOP **** */
 
-            self.world.objects_mut().iter().for_each(|object| {
-                object.event_handler(&mut event);
-            });
+            self.on_event(&mut event);
 
             if self.world.objects_ref().is_empty() {
                 self.game_over = true;
@@ -51,7 +67,8 @@ impl GameManager {
             }
 
             self.world.update();
-            /* ********* */
+
+            /* **** END MAIN GAME LOOP **** */
             let loop_time = self.clock.split();
             let intended_sleep_time =
                 Duration::from_nanos(REFRESH_RATE - loop_time - adjust_time as u64);
